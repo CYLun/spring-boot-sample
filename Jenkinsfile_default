@@ -45,20 +45,6 @@ pipeline {
         sh 'mvn package'
       }
     }
-    stage('wait for confirm') {
-        input {
-            message "Should we continue?"
-            ok "Yes, we should."
-            submitter "admin"
-            parameters {
-                string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-            }
-        }
-        steps {
-            echo "Hello, ${PERSON}, nice to meet you."
-            sh 'make deploy-default'
-        }
-    }
     stage('preview') {
         input {
             message "Should we continue?"
@@ -74,6 +60,25 @@ pipeline {
         archiveArtifacts(artifacts: '**/target/*.jar', fingerprint: true)
       }
     }
+     stage('wait for confirm') {
+            input {
+                message "Does staging at http://localhost:8000 look good?"
+                ok "Deploy to production"
+                submitter "admin"
+                parameters {
+                    string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+                }
+            }
+            steps {
+                echo "Hello, ${PERSON}, nice to meet you."
+
+            }
+            post { 
+                always { 
+                    sh "docker-compose stop server"
+                }
+            }
+        }
     stage('deploy') {
       steps {
         sh 'make deploy-default'
