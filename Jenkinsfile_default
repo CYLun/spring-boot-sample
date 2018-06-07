@@ -45,7 +45,7 @@ pipeline {
         sh 'mvn package'
       }
     }
-    stage('stage') {
+    stage('wait for confirm') {
         input {
             message "Should we continue?"
             ok "Yes, we should."
